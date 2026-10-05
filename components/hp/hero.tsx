@@ -1,120 +1,112 @@
 'use client';
-import {useRef} from 'react';
+import {useMemo, useRef, useState, type FormEvent} from 'react';
 import {gsap, useGSAP} from './gsap';
-import {ArrowDown, ArrowUpRight} from 'lucide-react';
-import {copy, href, formatMoney, formatNumber, valueLabel, type Lang} from '@/lib/i18n';
-import {ui} from '@/lib/ui';
+import {ArrowUpRight, ArrowRight, ChevronDown, Search} from 'lucide-react';
+import {formatMoney, href, valueLabel, type Lang} from '@/lib/i18n';
+import {ui, BUDGETS, FUELS} from '@/lib/ui';
+import {FILTER_EVENT, filterQuery, type Filters} from '@/lib/filters';
 import {GATE_EVENT} from './gate-script';
+import CarArt from './car-art';
 
-export type HeroCar = {slug: string; title: string; subtitle: string; demo: boolean; status: string; price: number; year: number; km: number; power: number; fuel: string; transmission: string; image: string};
+export type HeroStock = {brand: string; price: number; fuel: string; status: string};
+export type HeroCar = {slug: string; title: string; price: number; year: number; km: number; image: string};
 
-export default function Hero({lang, car}: {lang: Lang; car: HeroCar | null}) {
+// Callout anchors on the drawing, in % of the art box.
+const NOTES = [{x: 15, y: 50, up: true}, {x: 67, y: 33, up: true}, {x: 86, y: 52, up: true}, {x: 78, y: 72, up: false}];
+
+export default function Hero({lang, stock, brands, featured, initial}: {lang: Lang; stock: HeroStock[]; brands: string[]; featured: HeroCar | null; initial: Filters}) {
   const root = useRef<HTMLElement>(null);
-  const t = ui[lang], c = copy[lang];
-  const hp = car?.power ? Math.round(car.power * 1.35962) : 0;
-  const unit = lang === 'nl' ? 'pk' : lang === 'fr' ? 'ch' : 'hp';
-  const specs = car ? [
-    {label: c.year, value: String(car.year)},
-    {label: c.km, value: formatNumber(car.km, lang) + ' km', count: car.km, suffix: ' km'},
-    ...(hp ? [{label: c.power, value: formatNumber(hp, lang) + ' ' + unit, count: hp, suffix: ' ' + unit}] : []),
-    {label: c.gear, value: valueLabel(car.transmission, lang)},
-    {label: c.fuel, value: valueLabel(car.fuel, lang)},
-  ] : [];
+  const t = ui[lang].hero;
+  const [filters, setFilters] = useState<Filters>(initial);
+  const count = useMemo(() => stock.filter(c => c.status !== 'sold' &&
+    (!filters.brand || c.brand.toLowerCase() === filters.brand.toLowerCase()) &&
+    (!filters.budget || c.price <= filters.budget) &&
+    (!filters.fuel || c.fuel === filters.fuel)).length, [stock, filters]);
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    const q = filterQuery(filters);
+    const params = new URLSearchParams(location.search);
+    ['merk', 'budget', 'brandstof', 'sort'].forEach(k => params.delete(k));
+    new URLSearchParams(q).forEach((v, k) => params.set(k, v));
+    history.replaceState(null, '', '?' + params.toString() + '#aanbod');
+    window.dispatchEvent(new CustomEvent(FILTER_EVENT, {detail: filters}));
+    document.getElementById('aanbod')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
 
   useGSAP(() => {
     const el = root.current;
     if (!el) return;
     const media = el.querySelector<HTMLElement>('.hp-hero-media')!;
     const frame = el.querySelector<HTMLElement>('.hp-hero-frame')!;
-    const img = el.querySelector<HTMLElement>('.hp-hero-img')!;
-    const radius = () => window.innerWidth < 760 ? 18 : 28;
-    // The image layer always covers the whole hero; clipping it to the frame's box makes it "scale down" into place.
+    const radius = () => window.innerWidth < 760 ? 20 : 30;
     const inset = () => {
       const r = el.getBoundingClientRect(), f = frame.getBoundingClientRect();
       return `inset(${f.top - r.top}px ${r.right - f.right}px ${r.bottom - f.bottom}px ${f.left - r.left}px round ${radius()}px)`;
     };
-    const full = 'inset(0px 0px 0px 0px round 0px)';
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const strokes = gsap.utils.toArray<SVGGeometryElement>('[data-draw]', el);
+    strokes.forEach(s => { const len = s.getTotalLength(); gsap.set(s, {strokeDasharray: len, strokeDashoffset: len}); });
 
-    const counters = el.querySelectorAll<HTMLElement>('[data-count]');
     const tl = gsap.timeline({paused: true, defaults: {ease: 'expo.out'}});
-    tl.set(media, {clipPath: full})
-      .fromTo(img, {scale: 1.22}, {scale: 1, duration: 2.4, ease: 'power3.inOut'}, 0)
-      .to(media, {clipPath: inset, duration: 1.9, ease: 'power4.inOut'}, 0.35)
-      .to('.hp-hero-veil', {opacity: 0, duration: 1.4, ease: 'power2.out'}, 0.5)
-      .fromTo('[data-hero-line]', {yPercent: 115, opacity: 0}, {yPercent: 0, opacity: 1, duration: 1.3, stagger: 0.1}, 1.35)
-      .fromTo('[data-hero-fade]', {autoAlpha: 0, y: 18}, {autoAlpha: 1, y: 0, duration: 1, stagger: 0.09}, 1.6)
-      .fromTo('[data-hero-label]', {autoAlpha: 0, x: -14}, {autoAlpha: 1, x: 0, duration: 0.9}, 1.9)
-      // Specs arrive one after another, numbers counting up as they appear.
-      .fromTo('[data-spec]', {autoAlpha: 0, y: 26, filter: 'blur(10px)'}, {autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.9, stagger: 0.16, ease: 'power3.out'}, 2.0)
-      .fromTo('[data-spec-line]', {scaleX: 0, opacity: 1}, {scaleX: 1, opacity: 1, duration: 1.4, ease: 'power3.inOut'}, 2.0)
-      .fromTo('[data-hero-price]', {autoAlpha: 0, y: 20}, {autoAlpha: 1, y: 0, duration: 1}, 2.0 + specs.length * 0.16)
-      .fromTo(document.querySelectorAll('[data-hero-header]'), {autoAlpha: 0, y: -20}, {autoAlpha: 1, y: 0, duration: 1}, 1.4);
-    counters.forEach((node, i) => {
-      const target = Number(node.dataset.count), suffix = node.dataset.suffix || '';
-      const state = {v: 0};
-      tl.call(() => { node.textContent = formatNumber(0, lang) + suffix; }, [], 0);
-      tl.to(state, {v: target, duration: 1.6, ease: 'power3.out', onUpdate: () => { node.textContent = formatNumber(Math.round(state.v), lang) + suffix; }}, 2.05 + i * 0.16);
-    });
+    tl.set(media, {clipPath: 'inset(0px 0px 0px 0px round 0px)'})
+      .set('.hp-art', {opacity: 1}, 0)
+      .to(media, {clipPath: inset, duration: 1.8, ease: 'power4.inOut'}, 0.3)
+      // The coupé rolls in while it is drawn, then the headlights come on.
+      .fromTo('.hp-art', {xPercent: -18, scale: 1.35}, {xPercent: 0, scale: 1, duration: 2.2, ease: 'power3.inOut'}, 0)
+      .fromTo('[data-wheel]', {rotation: -540, transformOrigin: '50% 50%'}, {rotation: 0, transformOrigin: '50% 50%', duration: 2.2, ease: 'power3.inOut'}, 0)
+      .to(strokes, {strokeDashoffset: 0, duration: 1.8, stagger: 0.03, ease: 'power2.inOut'}, 0.1)
+      .fromTo('[data-beam]', {opacity: 0}, {opacity: 1, duration: 0.25, repeat: 1, yoyo: true, ease: 'steps(1)'}, 2.2)
+      .to('[data-beam]', {opacity: 1, duration: 0.5}, 2.75)
+      .fromTo('[data-hero-line]', {yPercent: 115, opacity: 0}, {yPercent: 0, opacity: 1, duration: 1.2, stagger: 0.1}, 1.2)
+      .fromTo('[data-hero-fade]', {autoAlpha: 0, y: 18}, {autoAlpha: 1, y: 0, duration: 1, stagger: 0.09}, 1.45)
+      .fromTo('[data-note]', {autoAlpha: 0, y: 14, filter: 'blur(6px)'}, {autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.8, stagger: 0.18, ease: 'power3.out'}, 2.0)
+      .fromTo('[data-hero-card]', {autoAlpha: 0, y: 24}, {autoAlpha: 1, y: 0, duration: 1}, 2.6)
+      .fromTo(document.querySelectorAll('[data-hero-header]'), {autoAlpha: 0, y: -20}, {autoAlpha: 1, y: 0, duration: 1}, 1.3);
 
-    const play = () => {
-      if (reduce) tl.progress(1); else tl.play(0);
-    };
+    const play = () => { if (reduce) tl.progress(1); else tl.play(0); };
     if (document.documentElement.classList.contains('hp-gate-open')) window.addEventListener(GATE_EVENT, play, {once: true});
     else play();
-
-    // Keep the frame aligned when the layout changes after the intro.
     const onResize = () => { if (tl.progress() === 1) gsap.set(media, {clipPath: inset()}); };
     window.addEventListener('resize', onResize);
-
-    if (!reduce) {
-      gsap.to('.hp-hero-parallax', {yPercent: 12, ease: 'none', scrollTrigger: {trigger: el, start: 'top top', end: 'bottom top', scrub: true}});
-      gsap.to('.hp-hero-copy', {y: -80, opacity: 0.2, ease: 'none', scrollTrigger: {trigger: el, start: 'top top', end: 'bottom top', scrub: true}});
-    }
+    if (!reduce) gsap.to('.hp-hero-copy', {y: -60, opacity: 0.3, ease: 'none', scrollTrigger: {trigger: el, start: 'top top', end: 'bottom top', scrub: true}});
     return () => { window.removeEventListener('resize', onResize); window.removeEventListener(GATE_EVENT, play); };
   }, {scope: root});
 
-  const lines = t.hero.lines;
-  return <section ref={root} className="hp-hero" aria-label={t.hero.featured}>
-    <div className="hp-hero-media" aria-hidden="true">
-      <div className="hp-hero-parallax">
-        <img className="hp-hero-img" src={car?.image || '/media/demo-car-1.jpg'} alt="" width="1920" height="1080" fetchPriority="high"/>
-      </div>
-      <span className="hp-hero-veil"/>
-      <span className="hp-hero-media-shade"/>
-    </div>
+  const select = (label: string, value: string, onChange: (v: string) => void, options: [string, string][]) =>
+    <label className="hp-field">
+      <span>{label}</span>
+      <span className="hp-select"><select value={value} onChange={e => onChange(e.target.value)}>{options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select><ChevronDown size={16}/></span>
+    </label>;
+
+  return <section ref={root} className="hp-hero" aria-label={t.lines.join(' ')}>
+    <div className="hp-hero-media" aria-hidden="true"><span className="hp-studio-floor"/></div>
     <div className="hp-container hp-hero-grid">
       <div className="hp-hero-copy">
-        <p className="hp-eyebrow" data-hero-fade><span className="hp-dot"/>{t.hero.eyebrow}{car?.demo ? ' · ' + c.demo : ''}</p>
-        <h1 className="hp-hero-title">
-          {lines.map(line => <span key={line} className="hp-line"><span data-hero-line>{line}</span></span>)}
-        </h1>
-        <p className="hp-hero-intro" data-hero-fade>{t.hero.intro}</p>
-        <div className="hp-hero-actions" data-hero-fade>
-          {car && <a className="hp-btn hp-btn-light" href={href('/wagens/' + car.slug, lang)}>{t.hero.cta}<ArrowUpRight size={18}/></a>}
-          <a className="hp-btn hp-btn-ghost" href={href('/#aanbod', lang)}>{t.hero.all}</a>
-        </div>
+        <p className="hp-eyebrow" data-hero-fade><span className="hp-dot"/>{t.eyebrow}</p>
+        <h1 className="hp-hero-title">{t.lines.map(line => <span key={line} className="hp-line"><span data-hero-line>{line}</span></span>)}</h1>
+        <p className="hp-hero-intro" data-hero-fade>{t.intro}</p>
+        <form className="hp-search" onSubmit={submit} data-hero-fade aria-label={t.searchTitle}>
+          {select(t.brand, filters.brand, v => setFilters(f => ({...f, brand: v})), [['', t.allBrands], ...brands.map(b => [b, b] as [string, string])])}
+          {select(t.budget, String(filters.budget), v => setFilters(f => ({...f, budget: Number(v)})), [['0', t.anyBudget], ...BUDGETS.map(b => [String(b), t.upTo + ' ' + formatMoney(b, lang)] as [string, string])])}
+          {select(t.fuel, filters.fuel, v => setFilters(f => ({...f, fuel: v})), [['', t.anyFuel], ...FUELS.map(f => [f, valueLabel(f, lang)] as [string, string])])}
+          <button className="hp-btn hp-btn-accent hp-search-submit" type="submit"><Search size={18}/>{count ? t.show(count) : t.search}</button>
+        </form>
+        <a className="hp-hero-sell" href="#waarde" data-hero-fade>{t.sellCta}<ArrowRight size={16}/></a>
       </div>
       <div className="hp-hero-frame">
-        {car && <a className="hp-hero-label" data-hero-label href={href('/wagens/' + car.slug, lang)}>
-          <strong>{car.title}</strong><span>{car.subtitle}</span>
+        <div className="hp-studio-art">
+          <CarArt/>
+          {t.notes.map((note, i) => <span key={note} className={'hp-note' + (NOTES[i].up ? '' : ' is-down')} style={{left: NOTES[i].x + '%', top: NOTES[i].y + '%'}} data-note>
+            <i/><b>{note}</b>
+          </span>)}
+        </div>
+        {featured && <a className="hp-newin" href={href('/wagens/' + featured.slug, lang)} data-hero-card>
+          <img src={featured.image} alt="" width="160" height="110"/>
+          <span><small>{t.newIn}</small><strong>{featured.title}</strong><em>{featured.year} · {featured.km.toLocaleString(lang === 'en' ? 'en-GB' : lang + '-BE')} km</em></span>
+          <span className="hp-newin-price">{formatMoney(featured.price, lang)}<ArrowUpRight size={18}/></span>
         </a>}
       </div>
-      {car && <div className="hp-hero-specs">
-        <span className="hp-hero-specs-line" data-spec-line/>
-        <dl>
-          {specs.map(s => <div key={s.label} data-spec>
-            <dt>{s.label}</dt>
-            <dd {...(s.count ? {'data-count': s.count, 'data-suffix': s.suffix} : {})}>{s.value}</dd>
-          </div>)}
-        </dl>
-        <a className="hp-hero-price" data-hero-price href={href('/wagens/' + car.slug, lang)}>
-          <small>{car.demo ? c.demo : car.status === 'sold' ? c.sold : c.price}</small>
-          <strong>{formatMoney(car.price, lang)}</strong>
-          <span className="hp-round"><ArrowUpRight size={20}/></span>
-        </a>
-      </div>}
     </div>
-    <a href="#aanbod" className="hp-scroll" data-hero-fade aria-label={t.hero.scroll}><span>{t.hero.scroll}</span><ArrowDown size={16}/></a>
   </section>;
 }

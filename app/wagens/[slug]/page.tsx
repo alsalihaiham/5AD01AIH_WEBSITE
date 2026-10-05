@@ -101,6 +101,7 @@ export default async function CarPage({params, searchParams}: {params: Promise<{
             </div>
             <a className="hp-btn hp-btn-light hp-btn-block" href={mail}>{car.demo || car.status === 'sold' ? t.contact : t.appointment}<ArrowUpRight size={18}/></a>
             <a className="hp-btn hp-btn-ghost hp-btn-block" href={mail}><Mail size={16}/>{EMAIL}</a>
+            <ul className="hp-checks is-small">{u.detail.trust.map(item => <li key={item}><Check size={15}/>{item}</li>)}</ul>
             <a className="hp-trade" href={href('/verkopen', lang)}>
               <KeyRound size={20}/><span><strong>{u.detail.tradeTitle}</strong><small>{u.detail.tradeCta} →</small></span>
             </a>

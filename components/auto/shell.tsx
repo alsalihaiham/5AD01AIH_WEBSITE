@@ -4,6 +4,7 @@ import {motion, AnimatePresence} from 'framer-motion';
 import {ArrowUpRight, Menu, X} from 'lucide-react';
 import {href, type Lang} from '@/lib/i18n';
 import {ui, EMAIL} from '@/lib/ui';
+import ThemeToggle from '@/components/hp/theme-toggle';
 
 const LANGS: Lang[] = ['nl', 'fr', 'en'];
 
@@ -52,6 +53,7 @@ export function Header({lang = 'nl', path = '/', overlay = false}: {lang?: Lang;
           <div className="hp-langs" aria-label="Taal / Langue / Language">
             {LANGS.map(l => <a key={l} href={href(path, l)} hrefLang={l} lang={l} aria-current={l === lang ? 'true' : undefined}>{l.toUpperCase()}</a>)}
           </div>
+          <ThemeToggle label={t.theme}/>
           <a className="hp-btn hp-btn-light hp-btn-sm hp-header-cta" href={href('/verkopen', lang)}>{t.sell}</a>
           <button className="hp-menu-btn" onClick={() => setOpen(true)} aria-label={t.menu} aria-expanded={open}><Menu size={22}/></button>
         </div>
@@ -63,7 +65,7 @@ export function Header({lang = 'nl', path = '/', overlay = false}: {lang?: Lang;
         transition={{duration: .6, ease: [0.76, 0, 0.24, 1]}}>
         <div className="hp-container hp-mobile-top">
           <Wordmark/>
-          <button className="hp-menu-btn" onClick={() => setOpen(false)} aria-label={t.close} autoFocus><X size={24}/></button>
+          <span className="hp-mobile-tools"><ThemeToggle label={t.theme}/><button className="hp-menu-btn" onClick={() => setOpen(false)} aria-label={t.close} autoFocus><X size={24}/></button></span>
         </div>
         <nav className="hp-container hp-mobile-links">
           {[{label: t.home, to: '/'}, ...links, {label: t.sell, to: '/verkopen'}].map((l, i) =>

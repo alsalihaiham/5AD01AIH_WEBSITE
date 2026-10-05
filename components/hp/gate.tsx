@@ -6,11 +6,12 @@ import {href, type Lang} from '@/lib/i18n';
 import {ui} from '@/lib/ui';
 import {Wordmark} from '@/components/auto/shell';
 import {GATE_KEY, GATE_EVENT} from './gate-script';
+import CarArt, {GaugeArt} from './car-art';
 
 type Side = 'buy' | 'sell';
 const ease = [0.76, 0, 0.24, 1] as const;
 
-export default function Gate({lang, buyImage, sellImage}: {lang: Lang; buyImage: string; sellImage: string}) {
+export default function Gate({lang}: {lang: Lang}) {
   const t = ui[lang].gate;
   const [open, setOpen] = useState(true);
   const [hover, setHover] = useState<Side | null>(null);
@@ -40,9 +41,9 @@ export default function Gate({lang, buyImage, sellImage}: {lang: Lang; buyImage:
 
   if (!open) return null;
   const grow = (side: Side) => choice ? (choice === side ? 1 : 0.0001) : hover === side ? 1.35 : hover ? 0.85 : 1;
-  const panels: {side: Side; eyebrow: string; title: string; note: string; image: string}[] = [
-    {side: 'buy', eyebrow: t.buyEyebrow, title: t.buy, note: t.buyNote, image: buyImage},
-    {side: 'sell', eyebrow: t.sellEyebrow, title: t.sell, note: t.sellNote, image: sellImage},
+  const panels: {side: Side; eyebrow: string; title: string; note: string}[] = [
+    {side: 'buy', eyebrow: t.buyEyebrow, title: t.buy, note: t.buyNote},
+    {side: 'sell', eyebrow: t.sellEyebrow, title: t.sell, note: t.sellNote},
   ];
 
   return <div className={'hp-gate' + (choice ? ' is-chosen' : '')} role="dialog" aria-modal="true" aria-label={t.question}
@@ -55,9 +56,11 @@ export default function Gate({lang, buyImage, sellImage}: {lang: Lang; buyImage:
         initial={{clipPath: i === 0 ? 'inset(0 0 100% 0)' : 'inset(100% 0 0 0)'}}
         animate={{clipPath: 'inset(0 0 0% 0)', flexGrow: grow(p.side)}}
         transition={{clipPath: {duration: 1.1, ease, delay: .15 + i * .12}, flexGrow: {duration: choice ? .9 : .7, ease}}}>
-        <motion.img src={p.image} alt="" className="hp-gate-img" draggable={false}
-          initial={{scale: 1.3}} animate={{scale: hover === p.side || choice === p.side ? 1.04 : 1.12}}
-          transition={{duration: 1.6, ease: [0.22, 1, 0.36, 1]}}/>
+        <motion.span className="hp-gate-visual"
+          initial={{scale: 1.25, opacity: 0}} animate={{scale: hover === p.side || choice === p.side ? 1.06 : 1, opacity: 1}}
+          transition={{duration: 1.4, ease: [0.22, 1, 0.36, 1], opacity: {duration: .8, delay: .5 + i * .12}}}>
+          {p.side === 'buy' ? <CarArt/> : <GaugeArt/>}
+        </motion.span>
         <span className="hp-gate-shade"/>
         <motion.span className="hp-gate-copy" animate={{opacity: choice ? 0 : 1, y: choice ? -20 : 0}} transition={{duration: .4}}>
           <motion.span className="hp-gate-eyebrow" initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{delay: .9 + i * .1, duration: .7}}>{p.eyebrow}</motion.span>

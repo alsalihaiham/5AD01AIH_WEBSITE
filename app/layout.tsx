@@ -2,10 +2,11 @@ import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import './automotive.css';
 import './hp.css';
+import {themeScript} from '@/lib/theme';
 
 export const metadata: Metadata = {
-  title: {default: 'HP-Automotive — De juiste wagen. Zonder omweg.', template: '%s | HP-Automotive'},
-  description: 'Ontdek de wagens van HP-Automotive of verkoop uw wagen. Foto’s, video en heldere voertuiggegevens — in het Nederlands, Frans en Engels.',
+  title: {default: 'HP-Automotive — Goede wagens, eerlijk geprijsd', template: '%s | HP-Automotive'},
+  description: 'Tweedehandswagens in België met Car-Pass en duidelijke historiek. Kopen, inruilen of uw wagen verkopen bij HP-Automotive.',
   icons: {icon: '/favicon.svg'},
 };
 
@@ -19,7 +20,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Inter:wght@400;500;600&display=swap"/>
     </head>
     <body>
-      <script dangerouslySetInnerHTML={{__html: "document.documentElement.classList.add('hp-js')"}}/>
+      <script dangerouslySetInnerHTML={{__html: themeScript}}/>
       {children}
     </body>
   </html>;

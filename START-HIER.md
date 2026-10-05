@@ -49,3 +49,14 @@ Gebruik Cloudflare Workers met D1 en R2, geen statische Pages-upload. Het projec
 - **Aparte pagina Over ons:** `/over-ons`. De startpagina blijft gericht op het aanbod en verkopen.
 - Beheer (`/beheer`) en het verkoopformulier werken zoals voorheen; alleen de publieke vormgeving is vernieuwd.
 - Wie liever minder beweging wil (systeeminstelling *beperkte beweging*), ziet alles meteen zonder animaties.
+
+## Update — meer autoverkoop, licht/donker thema
+- **Licht/donker-knop** in de menubalk (zon/maan). De keuze wordt onthouden.
+- **Geen BMW M3 meer op de site.** De hero en het keuzescherm gebruiken een eigen lijntekening van een wagen. De oude M3-voorbeeldadvertentie is verborgen voor bezoekers; u kunt hem in `/beheer` archiveren.
+- **Zoeken en filteren:** zoekvak in de hero en een filterbalk boven het aanbod (merk, budget, brandstof, sorteren). Een zoekopdracht is te delen als link. Zonder resultaat kan de bezoeker zijn zoekopdracht mailen.
+- **"Nieuw binnen":** de nieuwste gepubliceerde wagen met foto verschijnt automatisch in de hero.
+- **Wat is uw wagen waard?** Kort formulier op de startpagina; merk, model en kilometerstand gaan mee naar het verkoopformulier.
+- **Veelgestelde vragen**, stappenplan en nieuwe teksten voor Over ons (NL/FR/EN).
+- Controleer of de beloftes kloppen met hoe u werkt (proefrit op afspraak, inruil, Car-Pass). Pas ze anders aan in `lib/ui.ts`.
+
+Bijwerken zonder opnieuw te installeren: pak de update-zip uit over uw projectmap en voer `npm run deploy` uit.
