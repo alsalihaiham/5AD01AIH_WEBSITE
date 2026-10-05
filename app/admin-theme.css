@@ -118,3 +118,4 @@
 @media (max-width: 900px) { .admin-visits { grid-template-columns: repeat(3, minmax(0, 1fr)); } .admin-visits-chart { grid-column: 1 / -1; min-height: 150px; } }
 @media (max-width: 560px) { .admin-visits { grid-template-columns: minmax(0, 1fr); } .hp-login-art { opacity: .3; } }
 @media (prefers-reduced-motion: reduce) { .hp-login-card.is-shaking, .admin-visits.is-loading > span { animation: none; } }
+.upload-error { margin-top: 16px; padding: 14px 16px; border-radius: 14px; background: rgba(255, 82, 82, .12); border: 1px solid rgba(255, 110, 110, .45); color: var(--hp-text); font-size: 15px; }
