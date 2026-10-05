@@ -1,0 +1,16 @@
+Demo listing media provenance
+
+Depicted vehicle: turquoise BMW M3 sedan. Exact year, specification, mileage, ownership and availability are not established. Stock footage must be presented as a demonstration, not real HP-Company Auto inventory.
+
+Creator: CALI_ MEDIA _
+Source page: https://www.pexels.com/video/dynamic-bmw-m3-in-a-parking-lot-30604139/
+Original downloadable video: https://videos.pexels.com/video-files/30604139/13103349_1920_1080_60fps.mp4
+License: Pexels License https://www.pexels.com/license/
+Verified 2026-10-01: photos and videos free to use, attribution not required, modification allowed; do not imply endorsement by depicted brands or people.
+
+Source is 1920x1080, 59.94fps, duration 18.20 seconds, no audio.
+Delivered demo-car.mp4: same full 18.20-second film, 1920x1080 at 30fps, H.264 web optimized with faststart, no audio, approximately 8 MB.
+demo-car-1.jpg: original video frame at 4.7 seconds, front three-quarter exterior.
+demo-car-2.jpg: original video frame at 8.4 seconds, rear detail including BMW M3 badge.
+demo-car-3.jpg: original video frame at 16.4 seconds, rear three-quarter exterior.
+All three JPEG files are 1920x1080 and depict the exact same turquoise BMW M3 shown in the video. No watermark. No generated imagery.
