@@ -1,0 +1,10 @@
+{
+  "workerName": "hp-automotive",
+  "databaseName": "hp-automotive",
+  "databaseId": "654e00b4-000a-43db-a43e-3757a2336c1f",
+  "bucketName": "hp-automotive-media",
+  "domain": "automotive.hp-company.be",
+  "adminEmails": "automotive@hp-company.be",
+  "accessTeamDomain": "",
+  "accessAudience": ""
+}

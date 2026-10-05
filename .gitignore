@@ -49,3 +49,4 @@ next-env.d.ts
 
 # TypeScript incremental cache
 *.tsbuildinfo
+.DS_Store
