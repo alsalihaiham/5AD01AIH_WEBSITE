@@ -9,14 +9,21 @@ const b64 = bytes => Buffer.from(bytes).toString('base64url');
 
 const tty = !!process.stdin.isTTY;
 const rl = readline.createInterface({input: process.stdin, output: process.stdout, terminal: tty});
-let muted = false;
-if (tty) rl._writeToOutput = text => { if (!muted || text.includes('\n') || text.includes('\r')) rl.output.write(text); };
+// While a password is typed, the line is redrawn as the question plus one * per character.
+let hiddenPrompt = null;
+if (tty) rl._writeToOutput = text => {
+  if (hiddenPrompt === null) rl.output.write(text);
+  else rl.output.write('\x1b[2K\r' + hiddenPrompt + '*'.repeat(rl.line.length));
+};
 const lines = [];
 let waiting = null;
 if (!tty) { rl.on('line', line => { if (waiting) { const w = waiting; waiting = null; w(line); } else lines.push(line); }); }
 function ask(question, hidden = false) {
+  if (tty) return new Promise(resolve => {
+    rl.question(question, answer => { if (hiddenPrompt !== null) { hiddenPrompt = null; rl.output.write('\n'); } resolve(answer); });
+    if (hidden) hiddenPrompt = question;
+  });
   process.stdout.write(question);
-  if (tty) return new Promise(resolve => { muted = hidden; rl.question('', answer => { muted = false; if (hidden) process.stdout.write('\n'); resolve(answer); }); });
   return new Promise(resolve => { if (lines.length) resolve(lines.shift()); else waiting = resolve; });
 }
 async function hash(password) {
