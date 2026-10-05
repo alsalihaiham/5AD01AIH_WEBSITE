@@ -2,6 +2,7 @@ import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import './automotive.css';
 import './hp.css';
+import './admin-theme.css';
 import {themeScript} from '@/lib/theme';
 
 export const metadata: Metadata = {

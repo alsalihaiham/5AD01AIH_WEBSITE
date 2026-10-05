@@ -60,3 +60,22 @@ Gebruik Cloudflare Workers met D1 en R2, geen statische Pages-upload. Het projec
 - Controleer of de beloftes kloppen met hoe u werkt (proefrit op afspraak, inruil, Car-Pass). Pas ze anders aan in `lib/ui.ts`.
 
 Bijwerken zonder opnieuw te installeren: pak de update-zip uit over uw projectmap en voer `npm run deploy` uit.
+
+## Update — inloggen met gebruikersnaam en wachtwoord
+Het beheer heeft nu een eigen inlogpagina: **automotive.hp-company.be/beheer/login**. U hebt Cloudflare Access niet meer nodig.
+
+**Eenmalig instellen**
+1. `npm run admin:password` → kies een gebruikersnaam en een wachtwoord (minstens 12 tekens). Het wachtwoord wordt nergens opgeslagen, alleen een versleutelde vingerafdruk ervan in `scripts/deploy.config.json`.
+2. `npm run deploy`
+3. Cloudflare → **Zero Trust → Access → Applications** → app *automotive* → **Delete**. Anders blijft Cloudflare zijn eigen aanmeldscherm tonen.
+
+**Goed om te weten**
+- Na 8 foute pogingen is inloggen vanaf dat adres 15 minuten geblokkeerd. U blijft 12 uur aangemeld; **Afmelden** staat rechtsboven.
+- Wachtwoord vergeten of wijzigen: opnieuw stap 1 en 2. Iedereen die aangemeld was, wordt dan afgemeld.
+- Deel `scripts/deploy.config.json` niet; het hoort niet in de update-zip.
+
+**Bezoekers tonen in het beheer (optioneel)**
+1. Cloudflare → rechtsboven profiel → **My Profile → API Tokens → Create Token → Custom token**. Rechten: **Zone → Analytics → Read**. Zone: *hp-company.be*. Maak de token aan en kopieer hem.
+2. `npx wrangler secret put CF_API_TOKEN --config dist/server/wrangler.json` → plak de token.
+3. Cloudflare → *hp-company.be* → **Overview**, rechts onderaan: kopieer de **Zone ID**. Zet in `scripts/deploy.config.json` de regel `"cloudflareZoneId": "<zone id>",` erbij.
+4. `npm run deploy`. De cijfers gelden voor het hele domein hp-company.be.

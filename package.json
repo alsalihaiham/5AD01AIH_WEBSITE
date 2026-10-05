@@ -14,7 +14,8 @@
     "db:generate": "drizzle-kit generate",
     "setup:local": "node scripts/setup-local-auto.mjs",
     "test": "node --test tests/*.test.mjs",
-    "deploy": "npm run build && node scripts/prepare-deploy.mjs && node ./node_modules/wrangler/bin/wrangler.js deploy --config dist/server/wrangler.json"
+    "deploy": "npm run build && node scripts/prepare-deploy.mjs && node ./node_modules/wrangler/bin/wrangler.js deploy --config dist/server/wrangler.json",
+    "admin:password": "node scripts/make-admin-password.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
