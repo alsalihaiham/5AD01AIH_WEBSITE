@@ -40,13 +40,18 @@ async function toJpeg(file: File) {
   return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', {type: 'image/jpeg'});
 }
 
+const withTimeout = <T,>(work: Promise<T>, ms: number) =>
+  Promise.race([work, new Promise<T>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))]);
+
 /** Returns a file the server accepts, or throws an error with a message for the user. */
 export async function prepareUpload(file: File): Promise<File> {
   if (isPhoto(file)) {
+    // A normal JPEG/PNG/WebP goes up as it is; only odd formats and very large photos are converted.
+    if (PASS_THROUGH.includes(file.type) && file.size <= 6 * 1024 * 1024) return file;
     try {
-      return await toJpeg(file);
+      return await withTimeout(toJpeg(file), 20000);
     } catch {
-      if (PASS_THROUGH.includes(file.type)) return file;
+      if (PASS_THROUGH.includes(file.type) && file.size <= 12 * 1024 * 1024) return file;
       throw new Error(`"${file.name}" kan niet gelezen worden. Kies een JPG- of PNG-foto.`);
     }
   }

@@ -119,3 +119,16 @@
 @media (max-width: 560px) { .admin-visits { grid-template-columns: minmax(0, 1fr); } .hp-login-art { opacity: .3; } }
 @media (prefers-reduced-motion: reduce) { .hp-login-card.is-shaking, .admin-visits.is-loading > span { animation: none; } }
 .upload-error { margin-top: 16px; padding: 14px 16px; border-radius: 14px; background: rgba(255, 82, 82, .12); border: 1px solid rgba(255, 110, 110, .45); color: var(--hp-text); font-size: 15px; }
+label.upload-zone { cursor: pointer; }
+.upload-zone.is-busy { cursor: progress; border-style: solid; border-color: var(--hp-accent); }
+.upload-bar { display: block; width: min(420px, 90%); height: 8px; border-radius: 99px; background: var(--hp-line-2); overflow: hidden; }
+.upload-bar i { display: block; height: 100%; background: var(--hp-accent); border-radius: inherit; transition: width .3s; }
+@media (max-width: 760px) {
+  .admin-header { position: static; flex-wrap: wrap; gap: 12px 16px; padding: 16px 20px; }
+  .admin-header .admin-label { display: none; }
+  .admin-account { width: 100%; margin-left: 0; gap: 14px; flex-wrap: wrap; font-size: 13px; }
+  .admin-account > span:first-child { display: none; }
+  .editor-top { top: 0; flex-wrap: wrap; gap: 12px; }
+  .editor-top .editor-actions { width: 100%; }
+  .editor-top .editor-actions .button { flex: 1; justify-content: center; }
+}
